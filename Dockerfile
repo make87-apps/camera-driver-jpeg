@@ -49,7 +49,7 @@ ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
 
 WORKDIR /app
 
-COPY ../make87/applications/user/camera_driver_jpeg .
+COPY . .
 
 RUN python3 -m pip install -U pip && \
     python3 -m pip install .
