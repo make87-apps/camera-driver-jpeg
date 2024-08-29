@@ -1,0 +1,10 @@
+BUILD_KIT:
+  name: python3
+  version: 0.0
+PERIPHERALS:
+  - name: CAMERA
+    type: camera
+SOCKETS:
+  - topic_name: IMAGE_DATA
+    message_type: make87.image.ImageJPEG.ImageJPEG
+    type: PUB
