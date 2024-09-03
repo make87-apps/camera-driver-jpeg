@@ -1,6 +1,6 @@
 build_kit:
   name: python3
-  version: 0.0
+  version: latest
 peripherals:
   - name: CAMERA
     type: camera
