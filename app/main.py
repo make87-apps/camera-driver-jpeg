@@ -1,3 +1,5 @@
+import logging
+
 from make87_messages.image.ImageJPEG_pb2 import ImageJPEG
 from make87 import get_topic, topic_names, peripheral_names, PublisherTopic
 import cv2
@@ -11,12 +13,12 @@ def main():
     while True:
         ret, frame = cap.read()
         if not ret:
-            print("Error: failed to capture frame.")
+            logging.error("Error: failed to capture frame.")
             break
 
         ret, frame_jpeg = cv2.imencode(".jpeg", frame)
         if not ret:
-            print("Error: Could not encode frame to JPEG.")
+            logging.error("Error: Could not encode frame to JPEG.")
             break
 
         frame_jpeg_bytes = frame_jpeg.tobytes()
@@ -24,7 +26,7 @@ def main():
         message = ImageJPEG(data=frame_jpeg_bytes)
         topic.publish(message)
 
-        print(f"Published JPEG with hash: {hash(frame_jpeg_bytes)}")
+        logging.info(f"Published JPEG with hash: {hash(frame_jpeg_bytes)}")
 
 
 if __name__ == "__main__":
