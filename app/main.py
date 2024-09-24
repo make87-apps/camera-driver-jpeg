@@ -26,7 +26,7 @@ def main():
         message = ImageJPEG(data=frame_jpeg_bytes)
         topic.publish(message)
 
-        logging.info(f"Published JPEG with hash: {hash(frame_jpeg_bytes)}")
+        print(f"Published JPEG with hash: {hash(frame_jpeg_bytes)}")
 
 
 if __name__ == "__main__":
