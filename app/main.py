@@ -1,6 +1,6 @@
 import logging
 
-from make87_messages.image.ImageJPEG_pb2 import ImageJPEG
+from make87_messages.image.compressed.image_jpeg_pb2 import ImageJPEG
 from make87 import get_topic, topic_names, peripheral_names, PublisherTopic
 import cv2
 
