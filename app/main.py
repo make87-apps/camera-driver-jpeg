@@ -1,16 +1,17 @@
 import logging
 
 from make87_messages.image.compressed.image_jpeg_pb2 import ImageJPEG
-from make87 import initialize, get_topic, topic_names, peripheral_names
+from make87 import initialize, get_publisher_topic, resolve_topic_name, resolve_peripheral_name
 import cv2
 
 
 def main():
     initialize()
 
-    topic = get_topic(name=topic_names.IMAGE_DATA)
+    topic_name = resolve_topic_name("IMAGE_DATA")
+    topic = get_publisher_topic(name=topic_name, message_type=ImageJPEG)
 
-    cap = cv2.VideoCapture(peripheral_names.CAMERA)
+    cap = cv2.VideoCapture(resolve_peripheral_name("CAMERA"))
 
     while True:
         ret, frame = cap.read()
