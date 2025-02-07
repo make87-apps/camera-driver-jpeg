@@ -1,17 +1,19 @@
 import logging
 
 from make87_messages.image.compressed.image_jpeg_pb2 import ImageJPEG
-from make87 import initialize, get_publisher, resolve_topic_name, resolve_peripheral_name
+from make87_messages.core.header_pb2 import Header
+import make87 as m87
 import cv2
 
 
 def main():
-    initialize()
+    m87.initialize()
 
-    topic_name = resolve_topic_name("IMAGE_DATA")
-    topic = get_publisher(name=topic_name, message_type=ImageJPEG)
+    topic = m87.get_publisher(name="IMAGE_DATA", message_type=ImageJPEG)
 
-    cap = cv2.VideoCapture(resolve_peripheral_name("CAMERA"))
+    cap = cv2.VideoCapture(m87.resolve_peripheral_name("CAMERA"))
+    camera_entity_name = m87.get_config_value("CAMERA_ENTITY_NAME", "camera", str)
+    verbose = m87.get_config_value("VERBOSE", False, bool)
 
     while True:
         ret, frame = cap.read()
@@ -26,10 +28,10 @@ def main():
 
         frame_jpeg_bytes = frame_jpeg.tobytes()
 
-        message = ImageJPEG(data=frame_jpeg_bytes)
+        message = ImageJPEG(data=frame_jpeg_bytes, header=m87.create_header(Header, entity_path=f"/{camera_entity_name}"))
         topic.publish(message)
-
-        print(f"Published JPEG with hash: {hash(frame_jpeg_bytes)}")
+        if verbose:
+            print(f"Published JPEG with hash: {hash(frame_jpeg_bytes)}")
 
 
 if __name__ == "__main__":
