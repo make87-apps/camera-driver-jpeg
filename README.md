@@ -1,4 +1,4 @@
-# Camera Driver (jpeg) for Python
+# Camera Driver For USB Cameras
 
 
 
