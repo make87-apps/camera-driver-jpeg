@@ -23,25 +23,13 @@ def get_last_camera_image() -> bytes:
             return b""
 
 
-def handle_get_last_camera_image(query: zenoh.Query):
-    img_msg = get_last_camera_image()
 
-    header = Header(entity_path="/camera")
-    header.timestamp.GetCurrentTime()
-    img_msg = ImageJPEG(data=img_msg, header=header)
-
-    message_encoded = ProtobufEncoder(message_type=ImageJPEG).encode(img_msg)
-    query.reply(key_expr=query.key_expr, payload=message_encoded)
-
-
-def publish_camera_image(config: make87.config.ApplicationConfig):
+def publish_camera_image(zenoh_interface: ZenohInterface, camera_reference: str):
     global last_image
-
-    zenoh_interface = ZenohInterface(name="zenoh-client", make87_config=config)
 
     topic = zenoh_interface.get_publisher(name="IMAGE")
 
-    cap = cv2.VideoCapture(make87.resolve_peripheral_name("CAMERA"))
+    cap = cv2.VideoCapture(camera_reference)
 
     while True:
         ret, frame = cap.read()
@@ -56,7 +44,7 @@ def publish_camera_image(config: make87.config.ApplicationConfig):
 
         frame_jpeg_bytes = frame_jpeg.tobytes()
 
-        header = Header(entity_path="/camera")
+        header = Header(entity_path=camera_reference)
         message = ImageJPEG(data=frame_jpeg_bytes, header=header)
         with last_image_lock:
             last_image = message.data
@@ -66,12 +54,23 @@ def publish_camera_image(config: make87.config.ApplicationConfig):
 
 def main():
     config = make87.config.load_config_from_env()
+    zenoh_interface = ZenohInterface(name="zenoh-client", make87_config=config)
+    camera_reference = config.peripherals.peripherals[0].peripheral.root.Camera.reference
 
-    camera_thread = Thread(target=publish_camera_image, args=(config,))
+
+    camera_thread = Thread(target=publish_camera_image, args=(zenoh_interface,camera_reference,))
     camera_thread.start()
 
-    zenoh_interface = ZenohInterface(name="zenoh-client", make87_config=config)
-    image_provider = zenoh_interface.get_provider(name="GET_CAMERA_IMAGE", handler=handle_get_last_camera_image)
+
+    def handle_get_last_camera_image_with_ref(query):
+        img_msg = get_last_camera_image()
+        header = Header(entity_path=camera_reference)
+        header.timestamp.GetCurrentTime()
+        img_msg = ImageJPEG(data=img_msg, header=header)
+        message_encoded = ProtobufEncoder(message_type=ImageJPEG).encode(img_msg)
+        query.reply(key_expr=query.key_expr, payload=message_encoded)
+
+    image_provider = zenoh_interface.get_provider(name="GET_CAMERA_IMAGE", handler=handle_get_last_camera_image_with_ref)
 
     camera_thread.join()
 
