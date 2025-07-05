@@ -1,21 +1,29 @@
-build_kit:
-  name: python3
-  version: latest
+version: 1
+interfaces:
+  - name: zenoh-client
+    protocol: zenoh
+    default_port:
+      name: zenoh-client
+      protocol: TCP
+      target_port: 7447
+    providers:
+      - name: GET_CAMERA_IMAGE
+        request_spec:
+          make87_message: make87_messages.core.Empty
+        response_spec:
+          make87_message: make87_messages.image.compressed.image_jpeg.ImageJPEG
+        encoding: proto
+    publishers:
+      - name: IMAGE
+        spec:
+          make87_message: make87_messages.image.compressed.image_jpeg.ImageJPEG
+        encoding: proto
 peripheral_requirements:
   - name: CAMERA
     peripheral_type: Camera
-outbound_topics:
-  - name: IMAGE_DATA
-    message_type: make87_messages.image.compressed.image_jpeg.ImageJPEG
-config:
-  values:
-    - name: CAMERA_ENTITY_NAME
-      description: "The root entity path or the camera used to build the data tree"
-      default_value: "camera"
-      required: false
-      secret: false
-    - name: VERBOSE
-      description: "If you want verbose logging"
-      default_value: "false"
-      required: false
-      secret: false
+build:
+  build_kit:
+    name: python3
+dev_build:
+  build_kit:
+    name: python3
